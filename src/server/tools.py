@@ -3,10 +3,24 @@ import requests
 
 UCSC_BASE = "https://api.genome.ucsc.edu"
 
-def liftover_coordinates(chrom: str, start: int, end: int, from_assembly: str, to_assembly: str):
+def parse_region(region: str):
+    """
+    Parse UCSC-style region strings, e.g. 'chr1:1000-2000'.
+    Returns (chrom, start, end).
+    """
+    try:
+        chrom, coords = region.split(":")
+        start, end = map(int, coords.replace(",", "").split("-"))
+        return chrom, start, end
+    except Exception:
+        raise ValueError(f"Invalid region format: {region}. Use e.g. 'chr1:1000-2000'.")
+    
+def liftover_coordinates(region: str, from_assembly: str, to_assembly: str):
     """
     Example function to call UCSC REST API for liftover.
     """
+    chrom, start, end = parse_region(region)
+
     url = f"{UCSC_BASE}/liftover"
     payload = {
         "from": from_assembly,
@@ -20,10 +34,12 @@ def liftover_coordinates(chrom: str, start: int, end: int, from_assembly: str, t
     response.raise_for_status()
     return response.json()
 
-def get_annotations(chrom: str, start: int, end: int, genome: str = "hg38", track: str = "knownGene"):
+def get_annotations(region: str, genome: str = "hg38", track: str = "knownGene"):
     """
     Example function to get annotations from UCSC.
     """
+    chrom, start, end = parse_region(region)
+
     url = f"{UCSC_BASE}/getData/track"
     payload = {
         "genome": genome,
