@@ -43,5 +43,6 @@ packages = ["src/server"]
 
 [tool.pytest.ini_options]
 markers = [
+    "smoke: lightweight smoke tests for basic MCP functionality",
     "integration: marks tests that perform real API calls or I/O",
 ]

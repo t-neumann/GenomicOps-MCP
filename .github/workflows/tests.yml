@@ -30,15 +30,46 @@ jobs:
       - name: Run unit tests
         run: |
           mkdir -p test-results
-          uv run pytest  \
-            -o log_cli=true --log-cli-level=INFO \
+          uv run pytest -o log_cli=true --log-cli-level=INFO \
             --junitxml=test-results/unit-tests.xml | tee test-results/unit.log
 
       - name: Upload unit test results
-        if: always() # upload even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-results
+          path: test-results/
+
+  smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run smoke tests
+        run: |
+          mkdir -p test-results
+          uv run pytest --smoke -o log_cli=true --log-cli-level=INFO \
+            --junitxml=test-results/smoke-tests.xml | tee test-results/smoke.log
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
           path: test-results/
 
   integration:
@@ -64,8 +95,7 @@ jobs:
       - name: Run integration tests
         run: |
           mkdir -p test-results
-          uv run pytest --integration \
-            -o log_cli=true --log-cli-level=INFO \
+          uv run pytest --integration -o log_cli=true --log-cli-level=INFO \
             --junitxml=test-results/integration-tests.xml | tee test-results/integration.log
 
       - name: Upload integration test results

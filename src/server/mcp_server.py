@@ -23,7 +23,6 @@ class OverlapRequest(BaseModel):
 def overlaps_api(req: OverlapRequest):
     return tools.get_annotations(req.region, req.assembly, req.track)
 
-
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "api":

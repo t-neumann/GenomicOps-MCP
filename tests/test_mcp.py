@@ -27,12 +27,12 @@ async def test_get_overlapping_features_tool_basic(mock_get):
     mock_get.return_value = mock_response
 
     async with Client(mcp) as client:
-        # Ensure tool is registered
+
         tools = await client.list_tools()
         tool_names = [t.name for t in tools]
         assert "get_overlapping_features" in tool_names
 
-        # Call the tool
+        # Call get_overlapping_features
         result = await client.call_tool(
             "get_overlapping_features",
             arguments={
@@ -42,7 +42,6 @@ async def test_get_overlapping_features_tool_basic(mock_get):
             },
         )
 
-        # Validate result
         assert result is not None
         assert not result.is_error
 
@@ -86,6 +85,22 @@ async def test_get_overlapping_features_tool_invalid_region(mock_get):
             )
 
 # ============================================================
+#  SMOKE TESTS (MCP client calls)
+# ============================================================
+
+@pytest.mark.smoke
+@pytest.mark.asyncio
+async def test_list_tools_basic():
+    """Ensure MCP correctly lists available tools."""
+    async with Client(mcp) as client:
+        tools = await client.list_tools()
+        tool_names = [t.name for t in tools]
+
+        assert isinstance(tools, list)
+        assert len(tools) > 0, "No tools were registered with MCP"
+        assert "get_overlapping_features" in tool_names
+
+# ============================================================
 #  INTEGRATION TESTS (UCSC API calls)
 # ============================================================
 
@@ -94,9 +109,8 @@ async def test_get_overlapping_features_tool_invalid_region(mock_get):
 async def test_get_overlapping_features_tool():
     """Test MCP server through the client"""
     
-    # Use the FastMCP Client to test the tool
+    # Use the FastMCP Client to test MCP
     async with Client(mcp) as client:
-        # List tools to verify it's registered
         tools = await client.list_tools()
         tool_names = [t.name for t in tools]
         assert "get_overlapping_features" in tool_names
@@ -111,7 +125,6 @@ async def test_get_overlapping_features_tool():
             }
         )
         
-        # The result should contain data
         assert result is not None
         assert not result.is_error
 
