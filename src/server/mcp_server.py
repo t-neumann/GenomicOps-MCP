@@ -3,7 +3,7 @@ from fastmcp import FastMCP
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Optional
-from server import tools
+from server import tools, liftover
 
 # === MCP ===
 
@@ -47,6 +47,59 @@ def list_assemblies(species_name: str) -> list:
     genomes = tools.fetch_ucsc_genomes()
     return tools.get_assemblies(species_name, genomes)
 
+@mcp.tool(
+    name="lift_over_coordinates",
+    description="Convert genomic coordinates between assemblies using UCSC liftOver.",
+    output_schema={
+        "type": "object",
+        "properties": {
+            "input": {"type": "string"},
+            "from": {"type": "string"},
+            "to": {"type": "string"},
+            "output": {"type": "string"},
+            "error": {"type": "string"},
+        },
+        "required": ["from", "to"],
+    },
+)
+def lift_over_tool(
+    region: str,
+    from_asm: str,
+    to_asm: str,
+    ensure_binary: bool = True,
+    ensure_chain: bool = True,
+) -> dict:
+    """
+    MCP tool wrapper for liftOver.
+
+    Converts genomic coordinates from one assembly to another using UCSC liftOver.
+    Automatically ensures the liftOver binary and required chain file are present.
+    """
+    try:
+        result = liftover.lift_over(
+            region,
+            from_asm,
+            to_asm,
+            ensure_binary=ensure_binary,
+            ensure_chain=ensure_chain,
+        )
+        return {
+            "input": region,
+            "from": from_asm,
+            "to": to_asm,
+            "output": result.get("output"),
+            "error": result.get("error"),
+        }
+    except Exception as e:
+        return {
+            "input": region,
+            "from": from_asm,
+            "to": to_asm,
+            "output": None,
+            "error": str(e),
+        }
+
+
 # === FastAPI ===
 
 # FastAPI for human testing
@@ -56,6 +109,13 @@ class OverlapRequest(BaseModel):
     region: str
     assembly: str = Field(alias="genome")
     track: Optional[str] = "knownGene"
+
+class LiftOverRequest(BaseModel):
+    region: str
+    from_asm: str
+    to_asm: str
+    ensure_binary: bool = True
+    ensure_chain: bool = True
 
 @app.post("/overlaps")
 def overlaps_api(req: OverlapRequest):
@@ -83,6 +143,14 @@ def refresh_ucsc_cache():
     """Force-refresh UCSC genome cache."""
     data = tools.fetch_ucsc_genomes(use_cache=False)
     return {"status": "refreshed", "entries": len(data)}
+
+@app.post("/liftover")
+def liftover_api(req: LiftOverRequest):
+    result = liftover.lift_over(req.region, req.from_asm, req.to_asm, ensure_binary=req.ensure_binary, ensure_chain=req.ensure_chain)
+    if isinstance(result, dict) and "error" in result:
+        # return 400 Bad Request with detail
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
 
 # === MAIN ===
 
