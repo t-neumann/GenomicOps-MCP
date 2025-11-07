@@ -19,7 +19,6 @@ def list_species() -> list:
     genomes = tools.fetch_ucsc_genomes()
     return tools.get_species(genomes)
 
-
 @mcp.tool(
     name="list_assemblies",
     description="Get assemblies for a given species (exact or fuzzy match)",
@@ -48,16 +47,51 @@ def list_assemblies(species_name: str) -> list:
     return tools.get_assemblies(species_name, genomes)
 
 @mcp.tool(
+    name="list_ucsc_tracks",
+    description="List all UCSC genome browser tracks for a given assembly/genome",
+    output_schema={
+        "type": "object",
+        "properties": {
+            "genome": {"type": "string"},
+            "tracks": {"type": "object"},
+            "error": {"type": "string"},
+        },
+        "required": ["genome", "tracks"]
+    }
+)
+def list_ucsc_tracks_tool(genome: str, timeout: int = 10) -> dict:
+    """
+    MCP tool to fetch all UCSC tracks for a given genome/assembly.
+    
+    Args:
+        genome (str): Assembly name (e.g., hg38, mm10)
+        timeout (int): Request timeout in seconds
+    
+    Returns:
+        dict: {
+            "genome": genome,
+            "tracks": { ... full UCSC tracks JSON ... },
+            "error": "..."  # optional, only if something fails
+        }
+    """
+    tracks = tools.list_ucsc_tracks(genome, timeout=timeout)
+    return {
+        "genome": genome,
+        "tracks": tracks if "error" not in tracks else {},
+        "error": tracks.get("error")
+    }
+
+@mcp.tool(
     name="lift_over_coordinates",
     description="Convert genomic coordinates between assemblies using UCSC liftOver.",
-    output_schema={
+output_schema={
         "type": "object",
         "properties": {
             "input": {"type": "string"},
             "from": {"type": "string"},
             "to": {"type": "string"},
-            "output": {"type": "string"},
-            "error": {"type": "string"},
+            "output": {"type": ["string", "null"]},
+            "error": {"type": ["string", "null"]},
         },
         "required": ["from", "to"],
     },
@@ -127,7 +161,6 @@ def list_species_api():
     genomes = tools.fetch_ucsc_genomes()
     return tools.get_species(genomes)
 
-
 @app.get("/assemblies/{species_name}")
 def list_assemblies_api(species_name: str, exact: bool = Query(True, description="Set to false for partial name matches")):
     """
@@ -137,6 +170,17 @@ def list_assemblies_api(species_name: str, exact: bool = Query(True, description
     """
     genomes = tools.fetch_ucsc_genomes()
     return tools.get_assemblies(species_name, genomes, exact)
+
+@app.get("/tracks/{genome}")
+def list_tracks_api(genome: str, timeout: int = Query(10, description="Request timeout in seconds")):
+    """
+    HTTP endpoint to list all available UCSC genome browser tracks for a given assembly/genome.
+    
+    Example:
+        /tracks/hg38
+    """
+    tracks = tools.list_ucsc_tracks(genome, timeout=timeout)
+    return tracks
 
 @app.post("/refresh-cache")
 def refresh_ucsc_cache():

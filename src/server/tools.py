@@ -43,6 +43,54 @@ def get_annotations(region: str, genome: str = "hg38", track: str = "knownGene")
         return response.json()
     except ValueError:
         return {"error": "No valid JSON returned", "text": response.text}
+
+def list_ucsc_tracks(genome: str = "hg38", timeout: int = 10) -> Dict[str, Any]:
+    """
+    List all available UCSC genome browser tracks for a given assembly.
+
+    Example:
+        list_ucsc_tracks("hg38")
+
+    Returns:
+        dict: Simplified UCSC track metadata, or {"error": "..."} if something fails.
+    """
+    url = f"{UCSC_BASE}/list/tracks?genome={genome}"
+
+    try:
+        resp = requests.get(url, timeout=timeout)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # The main track data is nested under the genome key, e.g. data["hs1"]
+        if genome not in data:
+            return {"error": f"No track data found for {genome}"}
+
+        tracks = data[genome]
+
+        # Flatten the response into a list of top-level tracks (filter out composite containers)
+        simplified_tracks = []
+        for track_name, track_info in tracks.items():
+            if isinstance(track_info, dict) and "type" in track_info:
+                simplified_tracks.append({
+                    "track_id": track_name,
+                    "shortLabel": track_info.get("shortLabel"),
+                    "longLabel": track_info.get("longLabel"),
+                    "type": track_info.get("type"),
+                    "group": track_info.get("group"),
+                    "bigDataUrl": track_info.get("bigDataUrl"),
+                    "html": track_info.get("html"),
+                })
+
+        return {
+            "genome": genome,
+            "track_count": len(simplified_tracks),
+            "tracks": simplified_tracks,
+        }
+
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to fetch tracks for {genome}: {e}"}
+    except ValueError:
+        return {"error": f"Invalid JSON returned for {genome} tracks"}
     
 # ---------------------------------------------------------------------
 # UCSC genome listing utilities
