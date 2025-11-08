@@ -56,30 +56,35 @@ def list_assemblies(species_name: str) -> list:
             "tracks": {"type": "object"},
             "error": {"type": "string"},
         },
-        "required": ["genome", "tracks"]
+        "required": ["genome", "tracks", "error"]
     }
 )
 def list_ucsc_tracks_tool(genome: str, timeout: int = 10) -> dict:
     """
     MCP tool to fetch all UCSC tracks for a given genome/assembly.
-    
-    Args:
-        genome (str): Assembly name (e.g., hg38, mm10)
-        timeout (int): Request timeout in seconds
-    
-    Returns:
-        dict: {
-            "genome": genome,
-            "tracks": { ... full UCSC tracks JSON ... },
-            "error": "..."  # optional, only if something fails
-        }
+    Returns schema-safe output for MCP validation.
     """
-    tracks = tools.list_ucsc_tracks(genome, timeout=timeout)
-    return {
-        "genome": genome,
-        "tracks": tracks if "error" not in tracks else {},
-        "error": tracks.get("error")
-    }
+    try:
+        result = tools.list_ucsc_tracks(genome, timeout=timeout)
+        if "error" in result:
+            return {
+                "genome": genome,
+                "tracks": {},
+                "error": str(result["error"]),
+            }
+
+        return {
+            "genome": genome,
+            "tracks": result or {},
+            "error": "",
+        }
+
+    except Exception as e:
+        return {
+            "genome": genome,
+            "tracks": {},
+            "error": str(e),
+        }
 
 @mcp.tool(
     name="lift_over_coordinates",
