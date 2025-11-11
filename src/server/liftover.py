@@ -6,7 +6,7 @@ import subprocess
 import urllib.request
 import shutil
 from pathlib import Path
-from server.tools import parse_region
+from server.ucsc_rest import parse_region
 
 LIFTOVER_BASE = Path(__file__).resolve().parent / "liftover_data"
 CHAIN_DIR = LIFTOVER_BASE / "chains"

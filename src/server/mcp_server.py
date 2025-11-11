@@ -3,7 +3,7 @@ from fastmcp import FastMCP
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Optional
-from server import tools, liftover
+from server import liftover, ucsc_rest
 
 # === MCP ===
 
@@ -11,13 +11,13 @@ mcp = FastMCP("ucsc-mcp")
 
 @mcp.tool()
 def get_overlapping_features(region: str, assembly: str, track: str = "knownGene") -> dict:
-    return tools.get_annotations(region, assembly, track)
+    return ucsc_rest.get_annotations(region, assembly, track)
 
 @mcp.tool()
 def list_species() -> list:
     """List all available species from UCSC."""
-    genomes = tools.fetch_ucsc_genomes()
-    return tools.get_species(genomes)
+    genomes = ucsc_rest.fetch_ucsc_genomes()
+    return ucsc_rest.get_species(genomes)
 
 @mcp.tool(
     name="list_assemblies",
@@ -43,8 +43,8 @@ def list_species() -> list:
 )
 def list_assemblies(species_name: str) -> list:
     """List all assemblies for a given species."""
-    genomes = tools.fetch_ucsc_genomes()
-    return tools.get_assemblies(species_name, genomes)
+    genomes = ucsc_rest.fetch_ucsc_genomes()
+    return ucsc_rest.get_assemblies(species_name, genomes)
 
 @mcp.tool(
     name="list_ucsc_tracks",
@@ -65,7 +65,7 @@ def list_ucsc_tracks_tool(genome: str, timeout: int = 10) -> dict:
     Returns schema-safe output for MCP validation.
     """
     try:
-        result = tools.list_ucsc_tracks(genome, timeout=timeout)
+        result = ucsc_rest.list_ucsc_tracks(genome, timeout=timeout)
         if "error" in result:
             return {
                 "genome": genome,
@@ -158,13 +158,13 @@ class LiftOverRequest(BaseModel):
 
 @app.post("/overlaps")
 def overlaps_api(req: OverlapRequest):
-    return tools.get_annotations(req.region, req.assembly, req.track)
+    return ucsc_rest.get_annotations(req.region, req.assembly, req.track)
 
 @app.get("/species")
 def list_species_api():
     """HTTP endpoint to list all UCSC species."""
-    genomes = tools.fetch_ucsc_genomes()
-    return tools.get_species(genomes)
+    genomes = ucsc_rest.fetch_ucsc_genomes()
+    return ucsc_rest.get_species(genomes)
 
 @app.get("/assemblies/{species_name}")
 def list_assemblies_api(species_name: str, exact: bool = Query(True, description="Set to false for partial name matches")):
@@ -173,8 +173,8 @@ def list_assemblies_api(species_name: str, exact: bool = Query(True, description
     Accepts scientific name, species key, or common name (case-insensitive).
     Supports partial matches if ?exact=false.
     """
-    genomes = tools.fetch_ucsc_genomes()
-    return tools.get_assemblies(species_name, genomes, exact)
+    genomes = ucsc_rest.fetch_ucsc_genomes()
+    return ucsc_rest.get_assemblies(species_name, genomes, exact)
 
 @app.get("/tracks/{genome}")
 def list_tracks_api(genome: str, timeout: int = Query(10, description="Request timeout in seconds")):
@@ -184,13 +184,13 @@ def list_tracks_api(genome: str, timeout: int = Query(10, description="Request t
     Example:
         /tracks/hg38
     """
-    tracks = tools.list_ucsc_tracks(genome, timeout=timeout)
+    tracks = ucsc_rest.list_ucsc_tracks(genome, timeout=timeout)
     return tracks
 
 @app.post("/refresh-cache")
 def refresh_ucsc_cache():
     """Force-refresh UCSC genome cache."""
-    data = tools.fetch_ucsc_genomes(use_cache=False)
+    data = ucsc_rest.fetch_ucsc_genomes(use_cache=False)
     return {"status": "refreshed", "entries": len(data)}
 
 @app.post("/liftover")
