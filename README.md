@@ -1,3 +1,5 @@
+[![CI Tests](https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml/badge.svg)](https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml)
+
 # 🧬 GenomicOps-MCP
 
 **GenomicOps-MCP** is a dual-mode Python server that exposes genomic feature operations via:
