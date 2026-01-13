@@ -193,6 +193,40 @@ curl http://localhost:8000/assemblies
 
 ---
 
+## :cloud: AWS EC2 deployment
+
+If you want to deploy GenomicOps-MCP to an Amazon EC2 instance, it is recommended to do this via Docker.
+
+- **First build and push the Docker container with the associated Dockerfile:**
+  ```bash
+  docker buildx build --platform linux/amd64,linux/arm64 -t tobneu/genomicsmcp:latest --push .
+  ```
+- **Fire up an EC2 instance (Amazon Linux 2023 AMI, t3.small is sufficient)**
+  
+  Make sure to confgure a security group that allows:
+  * SSH (port 22) from your IP
+  * Custom TCP (port 8000) from your IP (or 0.0.0.0/0 if you want public access
+- **Install Docker and launch container**
+  ```bash
+  sudo yum update -y
+  sudo yum install docker -y
+  sudo systemctl start docker
+  sudo systemctl enable docker
+  sudo usermod -a -G docker ec2-user
+
+  # Log out and back in for group changes to take effect
+  exit
+  ```
+  ```bash
+  docker run -d -p 8000:8000 --name genomics-mcp --restart unless-stopped tobneu/genomicsmcp
+  ```
+  - **Test service**
+  ```bash
+  curl http://<EC2 IP address>:8000/sse
+  ```
+  
+---
+
 ## 🧰 Development Tips
 
 - **Run with uv**  
