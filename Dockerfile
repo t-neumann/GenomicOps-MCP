@@ -13,9 +13,13 @@ COPY pyproject.toml README.md ./
 COPY src ./src
 
 RUN apt-get update && apt-get install -y \
-    curl \
+    curl wget \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /app/src/server/liftover_data \
+    && wget -O /app/src/server/liftover_data/liftOver \
+    http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver \
+    && chmod +x /app/src/server/liftover_data/liftOver \
     && curl -LsSf https://astral.sh/uv/install.sh | sh 
     
 RUN uv sync --no-dev
