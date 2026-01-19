@@ -199,7 +199,7 @@ If you want to deploy GenomicOps-MCP to an Amazon EC2 instance, it is recommende
 
 - **First build and push the Docker container with the associated Dockerfile:**
   ```bash
-  docker buildx build --platform linux/amd64,linux/arm64 -t tobneu/genomicsmcp:latest --push .
+  docker buildx build --platform linux/amd64,linux/arm64 -t tobneu/genomicops:latest --push .
   ```
 - **Fire up an EC2 instance (Amazon Linux 2023 AMI, t3.small is sufficient)**
   
@@ -218,7 +218,7 @@ If you want to deploy GenomicOps-MCP to an Amazon EC2 instance, it is recommende
   exit
   ```
   ```bash
-  docker run -d -p 8000:8000 --name genomics-mcp --restart unless-stopped tobneu/genomicsmcp
+  docker run -d -p 8000:8000 --name genomicops --restart unless-stopped tobneu/genomicops:latest
   ```
   - **Test service**
   ```bash
