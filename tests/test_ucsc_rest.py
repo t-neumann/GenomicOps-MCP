@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, Mock, mock_open
-from server import ucsc_rest
+from genomicops import ucsc_rest
 import json
 
 def test_parse_region_valid():
@@ -13,7 +13,7 @@ def test_parse_region_invalid():
     with pytest.raises(ValueError):
         ucsc_rest.parse_region("invalid_region")
 
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 def test_get_annotations_basic(mock_get):
     # Mock the HTTP response
     mock_response = Mock()
@@ -26,13 +26,13 @@ def test_get_annotations_basic(mock_get):
     assert "knownGene" in result
     assert result["knownGene"][0]["chrom"] == "chr1"
 
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 def test_get_annotations_invalid_region(mock_get):
     # Should raise ValueError because parse_region fails
     with pytest.raises(ValueError):
         ucsc_rest.get_annotations("chr1:abc-def", genome="hg38", track="knownGene")
 
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 def test_get_annotations_api_returns_invalid_json(mock_get):
     # Simulate invalid JSON from server
     mock_response = Mock()
@@ -62,7 +62,7 @@ def test_extract_ucsc_genomes():
     assert human["assemblies"][0]["genome"] == "hg38"
     assert human["assemblies"][0]["assemblyName"] == "GRCh38/hg38"
 
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 def test_fetch_ucsc_genomes_with_corrupted_cache(mock_get, tmp_path):
     cache_file = tmp_path / "cache.json"
     cache_file.write_text("{ this is not valid JSON ")
@@ -86,7 +86,7 @@ def test_fetch_ucsc_genomes_with_corrupted_cache(mock_get, tmp_path):
         cached_data = json.load(f)
     assert cached_data == genomes
 
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 def test_fetch_ucsc_genomes_without_cache(mock_get, tmp_path):
     # Prepare mock API response
     mock_resp = Mock()

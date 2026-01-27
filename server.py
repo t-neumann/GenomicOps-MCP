@@ -3,11 +3,11 @@ from fastmcp import FastMCP
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Optional
-from server import liftover, ucsc_rest
+from genomicops import liftover, ucsc_rest
 
 # === MCP ===
 
-mcp = FastMCP("ucsc-mcp")
+mcp = FastMCP("GenomicOps-MCP", version="0.1.0")
 
 @mcp.tool()
 def get_overlapping_features(region: str, assembly: str, track: str = "knownGene") -> dict:

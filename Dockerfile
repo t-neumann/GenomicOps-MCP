@@ -9,8 +9,8 @@ EXPOSE 8000
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
-COPY src ./src
+COPY pyproject.toml README.md server.py ./
+COPY genomicops ./genomicops
 
 RUN apt-get update && apt-get install -y \
     curl wget \
@@ -24,4 +24,4 @@ RUN apt-get update && apt-get install -y \
     
 RUN uv sync --no-dev
 
-CMD ["uv", "run", "fastmcp", "run", "src/server/mcp_server.py", "--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "fastmcp", "run", "server.py", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000"]

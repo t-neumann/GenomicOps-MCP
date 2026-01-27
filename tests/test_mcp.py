@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import patch, Mock
 from fastmcp.client import Client
-from server.mcp_server import mcp
+from server import mcp
 import json
 import logging
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # ============================================================
 
 @pytest.mark.asyncio
-@patch('server.ucsc_rest.requests.get')
+@patch('genomicops.ucsc_rest.requests.get')
 async def test_get_overlapping_features_tool_basic(mock_get):
     """Unit test: verify MCP server works with mocked UCSC response."""
     # Mock UCSC API response
@@ -51,7 +51,7 @@ async def test_get_overlapping_features_tool_basic(mock_get):
         assert data["knownGene"][0]["chrom"] == "chr1"
 
 @pytest.mark.asyncio
-@patch('server.ucsc_rest.requests.get')
+@patch('genomicops.ucsc_rest.requests.get')
 async def test_get_overlapping_features_tool_edge_case(mock_get):
     """Unit test: handle empty UCSC result gracefully."""
     mock_response = Mock()
@@ -72,7 +72,7 @@ async def test_get_overlapping_features_tool_edge_case(mock_get):
         assert "knownGene" in data
 
 @pytest.mark.asyncio
-@patch('server.ucsc_rest.requests.get')
+@patch('genomicops.ucsc_rest.requests.get')
 async def test_get_overlapping_features_tool_invalid_region(mock_get):
     """Unit test: invalid region should raise exception."""
     mock_get.side_effect = Exception("Invalid region")
@@ -85,7 +85,7 @@ async def test_get_overlapping_features_tool_invalid_region(mock_get):
             )
 
 @pytest.mark.asyncio
-@patch("server.ucsc_rest.requests.get")
+@patch("genomicops.ucsc_rest.requests.get")
 async def test_list_ucsc_species_mocked(mock_get):
     """Unit test: verify MCP list_species returns species from mocked UCSC."""
     mock_response = Mock()
@@ -121,7 +121,7 @@ async def test_list_ucsc_species_mocked(mock_get):
         assert any("assemblies" in s for s in data)
 
 @pytest.mark.asyncio
-@patch("server.ucsc_rest.fetch_ucsc_genomes")
+@patch("genomicops.ucsc_rest.fetch_ucsc_genomes")
 async def test_get_ucsc_assemblies_mocked(mock_fetch):
     """Unit test: verify list_assemblies returns proper match."""
     mock_fetch.return_value = [

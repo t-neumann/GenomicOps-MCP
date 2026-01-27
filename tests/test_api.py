@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from server.mcp_server import app
+from server import app
 from unittest.mock import patch, Mock
 import logging
 import json
@@ -110,7 +110,7 @@ def test_assemblies_endpoint_not_implemented():
     response = client.get("/assemblies")
     assert response.status_code == 404  # not implemented yet
 
-@patch("server.ucsc_rest.fetch_ucsc_genomes")
+@patch("genomicops.ucsc_rest.fetch_ucsc_genomes")
 def test_species_endpoint_returns_species(mock_fetch):
     """Test that /species returns a valid list of species"""
     mock_fetch.return_value = [
@@ -146,7 +146,7 @@ def test_species_endpoint_returns_species(mock_fetch):
     assert human["commonName"] == "Human"
     assert len(human["assemblies"]) == 2
 
-@patch("server.ucsc_rest.fetch_ucsc_genomes")
+@patch("genomicops.ucsc_rest.fetch_ucsc_genomes")
 def test_assemblies_endpoint_exact_match(mock_fetch):
     """Test /assemblies/{species_name} returns correct assemblies for exact match"""
     mock_fetch.return_value = [
@@ -166,7 +166,7 @@ def test_assemblies_endpoint_exact_match(mock_fetch):
     assert data["matched_species"] == "Homo sapiens"
     assert data["assemblies"][0]["genome"] == "hg38"
 
-@patch("server.ucsc_rest.fetch_ucsc_genomes")
+@patch("genomicops.ucsc_rest.fetch_ucsc_genomes")
 def test_assemblies_endpoint_fuzzy_match(mock_fetch):
     """Test /assemblies/{species_name} returns partial match results (case-insensitive)"""
     mock_fetch.return_value = [
@@ -186,7 +186,7 @@ def test_assemblies_endpoint_fuzzy_match(mock_fetch):
     assert data["matched_species"] == "Mus musculus"
     assert data["assemblies"][0]["genome"] == "mm10"
 
-@patch("server.ucsc_rest.fetch_ucsc_genomes")
+@patch("genomicops.ucsc_rest.fetch_ucsc_genomes")
 def test_assemblies_endpoint_no_match(mock_fetch):
     """Test /assemblies/{species_name} returns error message when species not found"""
     mock_fetch.return_value = [

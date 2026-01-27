@@ -24,7 +24,7 @@ def test_get_chain_name_basic():
 # ============================================================
 
 @patch("pathlib.Path.chmod")
-@patch("server.liftover.urllib.request.urlretrieve")
+@patch("genomicops.liftover.urllib.request.urlretrieve")
 def test_ensure_binary_download_success(mock_urlretrieve, mock_chmod, tmp_path, monkeypatch):
     """Ensure binary download success path."""
     # Simulate a downloaded file
@@ -42,7 +42,7 @@ def test_ensure_binary_download_success(mock_urlretrieve, mock_chmod, tmp_path, 
     mock_chmod.assert_called_once()
 
 
-@patch("server.liftover.urllib.request.urlretrieve")
+@patch("genomicops.liftover.urllib.request.urlretrieve")
 def test_ensure_chain_file_download_failure(mock_urlretrieve, tmp_path, monkeypatch):
     """If urlretrieve raises, ensure_chain_file should raise FileNotFoundError."""
     mock_urlretrieve.side_effect = Exception("network error")
@@ -59,14 +59,14 @@ def test_ensure_chain_file_download_failure(mock_urlretrieve, tmp_path, monkeypa
 # MAIN lift_over FUNCTION TESTS
 # ============================================================
 
-@patch("server.liftover.subprocess.run")
+@patch("genomicops.liftover.subprocess.run")
 def test_lift_over_invalid_region(mock_run):
     """Invalid region string should raise ValueError."""
     with pytest.raises(ValueError):
         liftover.lift_over("invalid_region", FROM, TO)
 
 
-@patch("server.liftover.subprocess.run")
+@patch("genomicops.liftover.subprocess.run")
 def test_lift_over_missing_chain_file(mock_run, tmp_path, monkeypatch):
     """Missing chain file should raise if ensure_chain=False."""
     monkeypatch.setattr(liftover, "CHAIN_DIR", tmp_path)
@@ -90,8 +90,8 @@ def test_lift_over_missing_binary(tmp_path, monkeypatch):
     assert "liftOver binary not found" in result["error"]
 
 
-@patch("server.liftover.urllib.request.urlretrieve")
-@patch("server.liftover.subprocess.run")
+@patch("genomicops.liftover.urllib.request.urlretrieve")
+@patch("genomicops.liftover.subprocess.run")
 def test_lift_over_subprocess_failure(mock_run, mock_urlretrieve, tmp_path, monkeypatch):
     """Subprocess failure should return informative error in result dict."""
     liftover_bin = tmp_path / "liftOver"
@@ -110,8 +110,8 @@ def test_lift_over_subprocess_failure(mock_run, mock_urlretrieve, tmp_path, monk
     assert "failure" in result["error"].lower()
 
 
-@patch("server.liftover.urllib.request.urlretrieve")
-@patch("server.liftover.subprocess.run")
+@patch("genomicops.liftover.urllib.request.urlretrieve")
+@patch("genomicops.liftover.subprocess.run")
 def test_lift_over_unit_success(mock_run, mock_urlretrieve, tmp_path, monkeypatch):
     """
     Unit test: simulate successful liftOver run.
