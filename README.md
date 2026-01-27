@@ -1,6 +1,31 @@
-[![CI Tests](https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml/badge.svg)](https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml)
+<!-- Badges -->
+<p align="center">
+  <a href="https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml">
+    <img src="https://github.com/t-neumann/GenomicOps-MCP/actions/workflows/tests.yml/badge.svg" alt="CI Tests">
+  </a>
+  <a href="https://github.com/t-neumann/GenomicOps-MCP/releases">
+    <img src="https://img.shields.io/github/v/release/t-neumann/GenomicOps-MCP?include_prereleases&label=version" alt="Version">
+  </a>
+  <a href="https://github.com/t-neumann/GenomicOps-MCP/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/t-neumann/GenomicOps-MCP" alt="License">
+  </a>
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/badge/python-≥3.10-blue.svg" alt="Python">
+  </a>
+  <a href="https://github.com/jlowin/fastmcp">
+    <img src="https://img.shields.io/badge/MCP-FastMCP-orange.svg" alt="FastMCP">
+  </a>
+</p>
 
-# 🧬 GenomicOps-MCP
+<h1 align="center">🧬 GenomicOps-MCP</h1>
+
+<p align="center">
+  <strong>A Model Context Protocol server for AI-assisted genomics workflows</strong>
+</p>
+
+<p align="center">
+  Query UCSC genome browser tracks • Liftover coordinates between assemblies • Explore species and genomes
+</p>
 
 **GenomicOps-MCP** is a Model Context Protocol (MCP) server exposing genomic operations for AI-assisted bioinformatics workflows.
 It provides tools for querying UCSC genome browser tracks, performing coordinate liftover between assemblies, and exploring available species and assemblies — all accessible in dual mode:
@@ -14,17 +39,15 @@ It currently provides tools to query **UCSC genome browser tracks**, including f
 
 ## 🚀 Features
 
-* **Coordinate Liftover**: Convert genomic coordinates between assemblies (e.g., hg19 → hg38)
-* **Feature Overlaps**: Query UCSC tracks for annotations overlapping a region
-* **Species & Assembly Listing**: Explore all UCSC-supported organisms and genome builds
-* **Track Discovery**: List available tracks for any assembly
-* **Auto-provisioning**: Automatically downloads liftOver binary and chain files as needed
 
-- **Dual Transport**: FastMCP powers both stdio (MCP) and streamable-http (web API) modes
-- **MCP integration:** Claude Desktop and other MCP-compatible LLM clients can call tools like `get_overlapping_features`.
-- **FastAPI web API:** Test and debug the same logic locally in a browser or via `curl`.
-- **Unified backend:** One codebase (`server.py`) supports both modes.
-- **FastMCP-powered:** Built with [FastMCP](https://gofastmcp.com) for standard-compliant and rapid MCP development.
+| Feature | Description |
+|---------|-------------|
+| 🔄 **Coordinate Liftover** | Convert genomic coordinates between assemblies (e.g., hg19 → hg38) |
+| 🔍 **Feature Overlaps** | Query UCSC tracks for annotations overlapping a region |
+| 🧬 **Species & Assemblies** | Explore all UCSC-supported organisms and genome builds |
+| 📊 **Track Discovery** | List available tracks for any assembly |
+| ⚡ **Dual Transport** | FastMCP powers both stdio (MCP) and streamable-http modes |
+| 📦 **Auto-provisioning** | Automatically downloads liftOver binary and chain files |
 
 ---
 
@@ -343,6 +366,13 @@ curl "http://localhost:8000/tracks/hg38?timeout=30"
 
 ---
 
-**Author:** Tobias Neumann  
-**License:** MIT  
-**Version:** 0.1.0
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <strong>Author:</strong> Tobias Neumann<br>
+  <strong>Version:</strong> 0.1.0
+</p>
